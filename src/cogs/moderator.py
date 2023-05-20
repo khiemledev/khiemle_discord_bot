@@ -61,6 +61,8 @@ class Moderator(commands.Cog, name="moderator"):
 
                 Số thành viên: {len(members)}
                 Up vote để bị kích: {len(members) // 2}
+
+                Để hủy poll này, react '❌'.
             """,
             color=discord.Color.blue(),
         )
@@ -68,12 +70,18 @@ class Moderator(commands.Cog, name="moderator"):
         # Add reactions to the message
         await message.add_reaction("👍")
         await message.add_reaction("👎")
+        await message.add_reaction("❌")
 
         def check(
-            _: discord.Reaction,
-            __: discord.User,
+            reaction: discord.Reaction,
+            user: discord.User,
         ) -> bool:
-            return False
+            # Stop the poll if the user who started the poll reacts with ❌
+            return (
+                reaction.message.id == message.id
+                and user == ctx.author
+                and reaction.emoji == "❌"
+            )
 
         try:
             await self.bot.wait_for(
@@ -82,6 +90,8 @@ class Moderator(commands.Cog, name="moderator"):
                 timeout=timeout,
             )
         except asyncio.TimeoutError:
+            pass
+        finally:
             # Get the updated message with reactions
             message = await message.channel.fetch_message(message.id)
 
@@ -89,6 +99,17 @@ class Moderator(commands.Cog, name="moderator"):
             yes_votes = 0
             no_votes = 0
             for reaction in message.reactions:
+                if reaction.emoji == "❌":
+                    msg = discord.Embed(
+                        title="Poll đã bị hủy",
+                        description="""
+                            Poll đã bị hủy bởi người tạo poll.
+                        """,
+                        color=discord.Color.red(),
+                    )
+                    await message.edit(embed=msg)
+                    await message.clear_reactions()
+                    return
                 if reaction.emoji == "👍":
                     yes_votes = (
                         reaction.count - 1

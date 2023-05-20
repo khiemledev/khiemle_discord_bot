@@ -16,6 +16,13 @@ class Greetings(commands.Cog, name="greetings"):
             member.guild.channels,
             name=config.discord.welcome_channel,
         )
+        if channel is None:
+            self.bot.logger.info(
+                'Channel "%s" not found',
+                config.discord.welcome_channel,
+            )
+            return
+
         if channel:
             await channel.send(f"Chào đằng ấy, {member.mention} <3")
 
@@ -27,6 +34,13 @@ class Greetings(commands.Cog, name="greetings"):
             after.guild.channels,
             name=config.discord.announcement_channel,
         )
+        if channel is None:
+            self.bot.logger.info(
+                'Channel "%s" not found',
+                config.discord.announcement_channel,
+            )
+            return
+
         allowed_mentions = discord.AllowedMentions(everyone=True)
 
         if before.roles != after.roles:

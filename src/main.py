@@ -33,6 +33,12 @@ class KhiemLeBot(commands.Bot):
             self.get_all_channels(),
             name=config.discord.bot_log_channel,
         )
+        if channel is None:
+            self.logger.info(
+                'Channel "%s" not found', config.discord.bot_log_channel
+            )
+            return
+
         message = random.choice(config.discord.bot_ready_messages)
         await channel.send(message)
 
@@ -43,7 +49,11 @@ class KhiemLeBot(commands.Bot):
             name=config.discord.bot_log_channel,
         )
         if not channel:
+            self.logger.info(
+                'Channel "%s" not found', config.discord.bot_log_channel
+            )
             return
+
         message = random.choice(config.discord.bot_close_messages)
         await channel.send(message)
 
