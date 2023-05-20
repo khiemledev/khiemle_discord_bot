@@ -62,7 +62,7 @@ class Moderator(commands.Cog, name="moderator"):
                 Số thành viên: {len(members)}
                 Up vote để bị kích: {len(members) // 2}
 
-                Để hủy poll này, react '❌'.
+                {ctx.author.mention} Để hủy poll này, react '❌'.
             """,
             color=discord.Color.blue(),
         )
