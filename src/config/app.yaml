@@ -1,0 +1,17 @@
+discord:
+  bot_token: ${env:DISCORD_BOT_TOKEN}
+  command_prefix: "/"
+  announcement_channel: "announcements"
+  welcome_channel: "welcome"
+  bot_log_channel: "dev-bot"
+  bot_ready_messages:
+    - "Ú òa, hế lô ae, lại là mình đây :D"
+    - "Halo ae, mình lại gặp nhau gòi :3"
+  bot_close_messages:
+    - "Huhu, tui bị shut down gòi =_("
+    - "Bye ae, hẹn gặp lại vào một ngày không xa :D"
+  bot_command_error_message: "Command bị lỗi ròi bạn ơi :("
+
+llm:
+  model_name: ${env:CHATGPT_MODEL_NAME}
+  openai_api_key: ${env:OPENAI_API_KEY}
