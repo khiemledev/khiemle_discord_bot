@@ -9,6 +9,51 @@ class ChatGPT(commands.Cog, name="chatgpt"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        if not self.bot.user.mentioned_in(message):
+            return
+
+        history = message.channel.history(limit=20)
+
+        messages = []
+        async for msg in history:
+            messages.append(msg)
+
+        messages = reversed(messages)  # reverse the list, oldest first
+
+        history_strs = []
+        for msg in messages:  # skip the last message, which is the mention
+            content = msg.content
+
+            # replace mention id with user's name
+            for mention in msg.mentions:
+                member = discord.utils.get(
+                    message.guild.members, id=mention.id
+                )
+                if member:
+                    content = content.replace(
+                        f"<@{mention.id}>",
+                        f"<{member.name}>",
+                    )
+
+            history_strs.append(f"{msg.author.name}: {content}")
+
+        history_str = "\n".join(history_strs[:-1])
+
+        async with message.channel.typing():
+            try:
+                chatgpt_response = llm_utils.call_chatgpt_bot_mentioned(
+                    history=history_str,
+                    message=history_strs[-1],
+                )
+                await message.reply(chatgpt_response)
+            except Exception as err:
+                self.bot.logger.exception(err)
+                await message.reply(
+                    "Huhu, em hog biết trả lời sao hết :_(",
+                )
+
     @commands.hybrid_command(
         name="chatgpt",
         description="Run ChatGPT",
