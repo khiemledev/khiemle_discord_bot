@@ -62,7 +62,7 @@ class Moderator(commands.Cog, name="moderator"):
                 Số thành viên: {len(members)}
                 Up vote để bị kích: {len(members) // 2}
 
-                {ctx.author.mention} Để hủy poll này, react '❌'.
+                {ctx.author.mention} Để hủy poll này, react ❌.
             """,
             color=discord.Color.blue(),
         )
@@ -100,16 +100,20 @@ class Moderator(commands.Cog, name="moderator"):
             no_votes = 0
             for reaction in message.reactions:
                 if reaction.emoji == "❌":
-                    msg = discord.Embed(
-                        title="Poll đã bị hủy",
-                        description="""
-                            Poll đã bị hủy bởi người tạo poll.
-                        """,
-                        color=discord.Color.red(),
-                    )
-                    await message.edit(embed=msg)
-                    await message.clear_reactions()
-                    return
+                    # Check if poll was closed by the user who started the poll
+                    async for user in reaction.users():
+                        if user == ctx.author:
+                            msg = discord.Embed(
+                                title="Poll đã bị hủy",
+                                description="""
+                                    Poll đã bị hủy bởi người tạo poll.
+                                """,
+                                color=discord.Color.red(),
+                            )
+                            await message.edit(embed=msg)
+                            await message.clear_reactions()
+                            return
+
                 if reaction.emoji == "👍":
                     yes_votes = (
                         reaction.count - 1
@@ -134,6 +138,140 @@ class Moderator(commands.Cog, name="moderator"):
             else:
                 await ctx.send(
                     f"Poll vote kích {member.mention} không đạt điều kiện.",
+                )
+
+    @commands.hybrid_command(name="vote_ban")
+    # @commands.bot_has_permissions(kick_members=True)
+    @app_commands.describe(member="Member to be banned")
+    @app_commands.describe(reason="Reason why member are being banned")
+    async def vote_ban(
+        self,
+        ctx: commands.Context,
+        member: discord.Member,
+        reason: str = None,
+        timeout: float = 60.0,
+    ):
+        if member == self.bot.user:
+            await ctx.send("Non, sao mà ban được em =))")
+            return
+
+        if member.id == ctx.author.id:
+            await ctx.send("Sao bạn lại tự ban chính mình zậy =(")
+            return
+
+        if member.guild_permissions.administrator:
+            msg = "Không thể ban được admin bạn ơi, bạn muốn đảo chính hả :("
+            await ctx.send(msg)
+            return
+
+        # check if bot has permission to kick members
+        if not ctx.guild.me.guild_permissions.kick_members:
+            await ctx.send(
+                "Tui hog có quyền ban member ời bạn ơi :(",
+            )
+            return
+
+        # Get member list not include the bots
+        members = [mem for mem in ctx.guild.members if mem.bot is False]
+
+        # Send a message to the channel asking users to vote
+        resp_embed = discord.Embed(
+            title="Vote ban member",
+            description=f"""
+                Có nên ban {member.mention} ko ae?
+                Lý do: {reason or 'Hổng có lý do'}
+                React like 👍 để ban, 👎 để không ban.
+
+                **Lưu ý: User bị ban sẽ không thể được mời lại vào server
+                trừ khi được xóa khỏi blacklist**
+
+                Cái poll này sẽ hết hạn sau {timeout} giây.
+                Nếu như hết hạn mà chưa đạt điều kiện thì sẽ không kích.
+
+                Điều kiện ban như sau:
+                  - Số up vote nhiều hơn down vote
+                  - Số up vote phải hơn 1 nửa số thành viên trong server
+                  (không tính bot)
+
+                Số thành viên: {len(members)}
+                Up vote để bị ban: {len(members) // 2}
+
+                {ctx.author.mention} Để hủy poll này, react ❌.
+            """,
+            color=discord.Color.blue(),
+        )
+        message = await ctx.send(embed=resp_embed)
+        # Add reactions to the message
+        await message.add_reaction("👍")
+        await message.add_reaction("👎")
+        await message.add_reaction("❌")
+
+        def check(
+            reaction: discord.Reaction,
+            user: discord.User,
+        ) -> bool:
+            # Stop the poll if the user who started the poll reacts with ❌
+            return (
+                reaction.message.id == message.id
+                and user == ctx.author
+                and reaction.emoji == "❌"
+            )
+
+        try:
+            await self.bot.wait_for(
+                "reaction_add",
+                check=check,
+                timeout=timeout,
+            )
+        except asyncio.TimeoutError:
+            pass
+        finally:
+            # Get the updated message with reactions
+            message = await message.channel.fetch_message(message.id)
+
+            # Count the number of yes and no votes
+            yes_votes = 0
+            no_votes = 0
+            for reaction in message.reactions:
+                if reaction.emoji == "❌":
+                    # Check if poll was closed by the user who started the poll
+                    async for user in reaction.users():
+                        if user == ctx.author:
+                            msg = discord.Embed(
+                                title="Poll đã bị hủy",
+                                description="""
+                                    Poll đã bị hủy bởi người tạo poll.
+                                """,
+                                color=discord.Color.red(),
+                            )
+                            await message.edit(embed=msg)
+                            await message.clear_reactions()
+                            return
+
+                if reaction.emoji == "👍":
+                    yes_votes = (
+                        reaction.count - 1
+                    )  # Subtract 1 to exclude the bot's own reaction
+                elif reaction.emoji == "👎":
+                    no_votes = (
+                        reaction.count - 1
+                    )  # Subtract 1 to exclude the bot's own reaction
+
+            # Check if the vote passes (50% or more yes votes)
+            if yes_votes >= len(members) // 2 and yes_votes > no_votes:
+                try:
+                    await member.ban(
+                        reason=reason or "Bạn bị ban bởi vote kick poll."
+                    )
+                    await ctx.send(f"{member.mention} đã bị ban khỏi server.")
+                except discord.Forbidden as err:
+                    self.bot.logger.exception(err)
+                    await ctx.send(
+                        f"Tui hog có quyền để ban {member.mention} :_("
+                    )
+            else:
+                await ctx.send(
+                    f"Poll vote ban {member.mention} không đạt điều kiện.",
                 )
 
 
