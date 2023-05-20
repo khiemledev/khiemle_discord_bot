@@ -11,6 +11,7 @@ discord:
     - "Huhu, tui bị shut down gòi =_("
     - "Bye ae, hẹn gặp lại vào một ngày không xa :D"
   bot_command_error_message: "Command bị lỗi ròi bạn ơi :("
+  meme_dir: data/meme
 
 llm:
   model_name: ${env:CHATGPT_MODEL_NAME}
