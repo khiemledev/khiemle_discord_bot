@@ -1,11 +1,65 @@
 import random
+from typing import Any, List, Mapping, Optional
 
 import discord
 from discord.ext import commands
+from discord.ext.commands import Command
 
 from utils import bot_utils, config_utils, logger_utils
 
 config = config_utils.get_config()
+
+
+class BotHelpCommand(commands.DefaultHelpCommand):
+    def __init__(self):
+        super().__init__()
+
+    async def send_bot_help(
+        self,
+        mapping: Mapping[Optional[commands.Cog], List[Command[Any, ..., Any]]],
+    ):
+        embed = discord.Embed(
+            title="Danh sách các command của bot",
+            color=discord.Color.blue(),
+        )
+        for cog, _commands in mapping.items():
+            if cog is None:
+                continue
+
+            command_signatures = []
+            for command in _commands:
+                # Get the command signature
+                signature = self.get_command_signature(command)
+
+                # Get the command description
+                description = command.help or "Không có mô tả command"
+
+                # Get the argument descriptions
+                arg_descs = []
+                for param in command.clean_params.values():
+                    arg_desc = param.annotation or "Không có mô tả argument"
+                    if not isinstance(arg_desc, str):
+                        arg_desc = arg_desc.__name__
+                    arg_descs.append(f"{param.name}: {arg_desc}")
+                if len(arg_descs):
+                    arg_descs = "\n".join(["- " + a for a in arg_descs])
+                else:
+                    arg_descs = "No argument required"
+
+                # Add the command description to the list
+                command_signatures.append(
+                    (f"{signature}\n{description}\n" f"Arguments: {arg_descs}")
+                )
+
+            if command_signatures:
+                cog_name = cog.qualified_name
+                embed.add_field(
+                    name=cog_name,
+                    value="\n\n".join(command_signatures),
+                    inline=False,
+                )
+
+        await self.get_destination().send(embed=embed)
 
 
 class KhiemLeBot(commands.Bot):
@@ -20,6 +74,7 @@ class KhiemLeBot(commands.Bot):
                 config.discord.command_prefix,
             ),
             intents=intents,
+            help_command=BotHelpCommand(),
         )
 
     async def setup_hook(self):
