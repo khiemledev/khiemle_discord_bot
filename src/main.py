@@ -62,7 +62,10 @@ class KhiemLeBot(commands.Bot):
         ctx: commands.Context,
         exception: commands.CommandError,
     ):
-        self.logger.exception(exception)
+        self.logger.error(str(exception))
+        if isinstance(exception, commands.CommandNotFound):
+            return
+
         resp_embed = discord.Embed(
             title=config.discord.bot_command_error_message,
             description=f"```{exception}```",
