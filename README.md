@@ -2,12 +2,26 @@
 
 ## Features
 
+General:
+
+- [x] **/help** - List all commands
 - [x] **/ping_bot** - Ping the bot
+- [x] **/random_number** - Choose random number in a range
+- [x] **/random_pick** - Randomly pick an item from a list
+
+Moderation:
+
 - [x] **/vote_kick** - Create a poll to kick a member
 - [x] **/vote_ban** - Create a poll to ban a member
+
+ChatGPT:
+
 - [x] **/chatgpt** - Chat with GPT-3
-- [x] **/meme** - Get random meme
 - [x] You can mention the bot to chat with it (using ChatGPT under the hood)
+
+Meme:
+
+- [x] **/meme** - Get random meme
 
 ## Start the bot
 
@@ -57,7 +71,7 @@ You can change the config in the `src/config/app.yaml` file. The config in
 
 ## To-do
 
-- [ ] **/help** - List all commands
+<!-- - [ ] **/help** - List all commands -->
 
 ## Want a features?
 
