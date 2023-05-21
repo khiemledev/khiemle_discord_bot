@@ -1,13 +1,21 @@
 import asyncio
+from typing import List, Literal, TypedDict
 
 import discord
 from discord import app_commands
 from discord.ext import commands
 
 
+class VoteType(TypedDict):
+    message_id: int
+    voting_type: Literal["kick", "ban"]
+    member: discord.Member
+
+
 class Moderator(commands.Cog, name="moderator"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.voting_list: List[VoteType] = []
 
     @commands.hybrid_command(name="vote_kick")
     # @commands.bot_has_permissions(kick_members=True)
@@ -33,11 +41,17 @@ class Moderator(commands.Cog, name="moderator"):
             await ctx.send(msg)
             return
 
-        # check if bot has permission to kick members
+        # Check if bot has permission to kick members
         if not ctx.guild.me.guild_permissions.kick_members:
             await ctx.send(
                 "Tui hog có quyền kick member ời bạn ơi :(",
             )
+            return
+
+        # Check if member is already in the voting list
+        in_voting = [e for e in self.voting_list if e["member"] == member]
+        if len(in_voting):
+            await ctx.send(f"{member.mention} đang trong poll vote rồi.")
             return
 
         # Get member list not include the bots
@@ -83,7 +97,18 @@ class Moderator(commands.Cog, name="moderator"):
                 and reaction.emoji == "❌"
             )
 
+        voting_idx = None
         try:
+            # Add voting to the list
+            voting_idx = len(self.voting_list)
+            self.voting_list.append(
+                {
+                    "message_id": message.id,
+                    "voting_type": "kick",
+                    "member": member,
+                }
+            )
+
             await self.bot.wait_for(
                 "reaction_add",
                 check=check,
@@ -140,6 +165,10 @@ class Moderator(commands.Cog, name="moderator"):
                     f"Poll vote kích {member.mention} không đạt điều kiện.",
                 )
 
+            # Remove voting from the list
+            if voting_idx is not None:
+                self.voting_list.pop(voting_idx)
+
     @commands.hybrid_command(name="vote_ban")
     # @commands.bot_has_permissions(kick_members=True)
     @app_commands.describe(member="Member to be banned")
@@ -162,13 +191,18 @@ class Moderator(commands.Cog, name="moderator"):
         if member.guild_permissions.administrator:
             msg = "Không thể ban được admin bạn ơi, bạn muốn đảo chính hả :("
             await ctx.send(msg)
-            return
 
-        # check if bot has permission to kick members
+        # Check if bot has permission to kick members
         if not ctx.guild.me.guild_permissions.kick_members:
             await ctx.send(
                 "Tui hog có quyền ban member ời bạn ơi :(",
             )
+            return
+
+        # Check if member is already in the voting list
+        in_voting = [e for e in self.voting_list if e["member"] == member]
+        if len(in_voting):
+            await ctx.send(f"{member.mention} đang trong poll vote rồi.")
             return
 
         # Get member list not include the bots
@@ -217,7 +251,18 @@ class Moderator(commands.Cog, name="moderator"):
                 and reaction.emoji == "❌"
             )
 
+        voting_idx = None
         try:
+            # Add voting to the list
+            voting_idx = len(self.voting_list)
+            self.voting_list.append(
+                {
+                    "message_id": message.id,
+                    "voting_type": "ban",
+                    "member": member,
+                }
+            )
+
             await self.bot.wait_for(
                 "reaction_add",
                 check=check,
@@ -273,6 +318,10 @@ class Moderator(commands.Cog, name="moderator"):
                 await ctx.send(
                     f"Poll vote ban {member.mention} không đạt điều kiện.",
                 )
+
+            # Remove voting from the list
+            if voting_idx is not None:
+                self.voting_list.pop(voting_idx)
 
 
 async def setup(bot: commands.Bot) -> None:
