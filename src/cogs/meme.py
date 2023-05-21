@@ -16,6 +16,10 @@ class Meme(commands.Cog, name="meme"):
         # pre-load memes
         self.memes = []
         meme_dir = Path(config.discord.meme_dir)
+        if not meme_dir.is_dir():
+            self.bot.logger.error(f"meme_dir '{meme_dir}' is not a directory")
+            return
+
         # get all jpgs or pngs in meme_dir
         for meme in meme_dir.glob("**/*"):
             if not meme.is_file():
@@ -29,6 +33,10 @@ class Meme(commands.Cog, name="meme"):
     @commands.hybrid_command(name="meme")
     async def meme(self, ctx: commands.Context):
         """Get random meme from folder"""
+
+        if len(self.memes) == 0:
+            await ctx.send("No memes found")
+            return
 
         meme = random.choice(self.memes)
         await ctx.send(file=discord.File(meme))
