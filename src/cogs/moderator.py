@@ -17,7 +17,10 @@ class Moderator(commands.Cog, name="moderator"):
         self.bot = bot
         self.voting_list: List[VoteType] = []
 
-    @commands.hybrid_command(name="vote_kick")
+    @commands.hybrid_command(
+        name="vote_kick",
+        description="Vote to kick a member",
+    )
     # @commands.bot_has_permissions(kick_members=True)
     @app_commands.describe(member="Member to be kicked")
     @app_commands.describe(reason="Reason why member are being kicked out")
@@ -169,7 +172,10 @@ class Moderator(commands.Cog, name="moderator"):
             if voting_idx is not None:
                 self.voting_list.pop(voting_idx)
 
-    @commands.hybrid_command(name="vote_ban")
+    @commands.hybrid_command(
+        name="vote_ban",
+        description="Vote to ban a member",
+    )
     # @commands.bot_has_permissions(kick_members=True)
     @app_commands.describe(member="Member to be banned")
     @app_commands.describe(reason="Reason why member are being banned")

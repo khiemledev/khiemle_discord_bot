@@ -11,6 +11,8 @@ class ChatGPT(commands.Cog, name="chatgpt"):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
+        """Run ChatGPT when bot is mentioned"""
+
         if not self.bot.user.mentioned_in(message):
             return
 

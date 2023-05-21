@@ -30,7 +30,10 @@ class Meme(commands.Cog, name="meme"):
 
         self.bot.logger.info(f"Loaded {len(self.memes)} memes")
 
-    @commands.hybrid_command(name="meme")
+    @commands.hybrid_command(
+        name="meme",
+        description="Get random meme",
+    )
     async def meme(self, ctx: commands.Context):
         """Get random meme from folder"""
 

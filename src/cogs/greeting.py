@@ -12,6 +12,8 @@ class Greetings(commands.Cog, name="greetings"):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
+        """Send welcome message when a new member joins"""
+
         channel = discord.utils.get(
             member.guild.channels,
             name=config.discord.welcome_channel,
@@ -30,6 +32,8 @@ class Greetings(commands.Cog, name="greetings"):
     async def on_member_update(
         self, before: discord.Member, after: discord.Member
     ):
+        """Send announcement when a member is promoted/demoted"""
+
         channel = discord.utils.get(
             after.guild.channels,
             name=config.discord.announcement_channel,
