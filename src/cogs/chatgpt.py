@@ -16,6 +16,10 @@ class ChatGPT(commands.Cog, name="chatgpt"):
         if not self.bot.user.mentioned_in(message):
             return
 
+        # Not trigger if the message mentions everyone or roles
+        if message.mention_everyone or message.role_mentions:
+            return
+
         history = message.channel.history(limit=20)
 
         messages = []
