@@ -37,7 +37,7 @@ class LoggingFormatter(logging.Formatter):
 
 
 def get_logger(
-    name="discord_bot", logfile="logs/discord.py"
+    name="discord_bot", logfile="logs/discord.log"
 ) -> logging.Logger:
     """Get logger with console and file handler"""
 
