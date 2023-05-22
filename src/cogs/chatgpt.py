@@ -77,6 +77,13 @@ class ChatGPT(commands.Cog, name="chatgpt"):
             desc = f"{ctx.author.mention} phải có prompt để chạy chứ bạn ơi"
             return await resp.send_message(desc)
 
+        if temperature < 0.0 or temperature > 2.0:
+            desc = (
+                f"{ctx.author.mention} temperature phải nằm trong khoảng từ 0.0"
+                f" đến 2.0 chứ bạn ơi"
+            )
+            return await resp.send_message(desc)
+
         await resp.send_message(
             f"{ctx.author.mention} tui đang chạy prompt này nha <3 :\n `{prompt}`",
         )
