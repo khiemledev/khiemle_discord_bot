@@ -1,4 +1,7 @@
+logs/
+
 src/data/
+src/logs/
 .ruff_cache
 
 # Byte-compiled / optimized / DLL files

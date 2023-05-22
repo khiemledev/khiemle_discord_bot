@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 
 class LoggingFormatter(logging.Formatter):
@@ -35,7 +36,15 @@ class LoggingFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-def get_logger(name="discord_bot") -> logging.Logger:
+def get_logger(
+    name="discord_bot", logfile="logs/discord.py"
+) -> logging.Logger:
+    """Get logger with console and file handler"""
+
+    # Make sure that log dir is exists
+    p = Path(logfile)
+    p.parent.mkdir(parents=True, exist_ok=True)
+
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
 
@@ -44,7 +53,7 @@ def get_logger(name="discord_bot") -> logging.Logger:
     console_handler.setFormatter(LoggingFormatter())
     # File handler
     file_handler = logging.FileHandler(
-        filename="discord.log",
+        filename=logfile,
         encoding="utf-8",
         mode="w",
     )
