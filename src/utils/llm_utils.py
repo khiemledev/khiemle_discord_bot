@@ -60,6 +60,9 @@ def call_chatgpt_bot_mentioned(history: str, message: str):
     tin_nhắn_bạn_trả_lời_lại_người_mention_bạn
     ---
 
+    Bạn có thể quyết định sử dụng hoặc không sử dụng ngữ cảnh của cuộc hội
+    thoại tùy vào nội dung tin nhắn của người mention bạn.
+
     Lưu ý không đề cập người gửi là ai trong tin nhắn của bạn và không bao gồm
     dấu <> trong câu trả lời.
     """
