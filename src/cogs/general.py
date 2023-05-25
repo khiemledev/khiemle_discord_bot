@@ -19,7 +19,7 @@ class General(commands.Cog, name="general"):
         )
 
     @commands.hybrid_command(
-        name="randon_pick",
+        name="random_pick",
         description="Pick a random item from a list of items",
     )
     @app_commands.describe(
