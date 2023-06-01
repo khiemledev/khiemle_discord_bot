@@ -197,6 +197,7 @@ class Moderator(commands.Cog, name="moderator"):
         if member.guild_permissions.administrator:
             msg = "Không thể ban được admin bạn ơi, bạn muốn đảo chính hả :("
             await ctx.send(msg)
+            return
 
         # Check if bot has permission to kick members
         if not ctx.guild.me.guild_permissions.kick_members:
